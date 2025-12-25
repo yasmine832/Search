@@ -49,11 +49,11 @@ interface WordDao {
 
     //Get words that need practice
 
-    //todo
+    //todo sourceee link
     @Query("""
         SELECT * FROM words 
         WHERE wordListId = :listId 
-        AND (difficulty < 3 OR (timesCorrect * 100.0 / NULLIF(timesShown, 0)) < 60)
+        AND (difficulty < 3 OR (timesCorrect * 100.0 / NULLIF(timesShown, 0)) < 60) 
         ORDER BY difficulty ASC, lastPracticed ASC
         LIMIT :limit
     """)
