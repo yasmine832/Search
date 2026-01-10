@@ -17,3 +17,4 @@ data class WordList(
 
     val createdAt: Long = System.currentTimeMillis()
 )
+
