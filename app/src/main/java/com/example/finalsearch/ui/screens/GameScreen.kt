@@ -6,13 +6,13 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -42,7 +42,7 @@ fun GameScreen(
                 title = { Text("Word Search") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
                     }
                 },
                 actions = {
@@ -53,6 +53,29 @@ fun GameScreen(
             )
         }
     ) { paddingValues ->
+
+        if (gameState.isComplete) {
+            AlertDialog(
+                onDismissRequest = { },
+                title = { Text("Klaar!") },
+                text = {
+                    Column {
+                        Text("Score: ${gameState.score} punten")
+                        Text("Woorden: ${gameState.foundWords.size}")
+                    }
+                },
+                confirmButton = {
+                    Button(onClick = { viewModel.resetGame() }) {
+                        Text("Opnieuw")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = onNavigateBack) {
+                        Text("Terug")
+                    }
+                }
+            )
+        }
 
         if (gameState.grid == null) {
             // Loading state
@@ -82,23 +105,48 @@ fun GameScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Current clue/definition
+                // Current clue/definition  +SKIP
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
-                    Text(
-                        text = if (gameState.isComplete) {
-                            " Finished! Score: ${gameState.score}"
-                        } else {
-                            "Find: ${gameState.currentDefinition}"
-                        },
-                        modifier = Modifier.padding(16.dp),
-                        fontSize = 16.sp,
-                        textAlign = TextAlign.Center
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Previous button
+                        IconButton(
+                            onClick = { viewModel.previousWord() },
+                            enabled = !gameState.isComplete
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Previous word")
+                        }
+
+                        // Def
+                        Text(
+                            text = if (gameState.isComplete) {
+                                "Klaar!"
+                            } else {
+                                gameState.currentDefinition
+                            },
+                            fontSize = 16.sp,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        // Next button
+                        IconButton(
+                            onClick = { viewModel.nextWord() },
+                            enabled = !gameState.isComplete
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowForward, "Next word")
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -177,6 +225,7 @@ fun WordSearchGridView(
     }
 }
 
+
 //Aparte cel
 @Composable
 fun GridCell(
@@ -193,7 +242,7 @@ fun GridCell(
 
     Box(
         modifier = Modifier
-            .size(32.dp)
+            .size(30.dp)
             .padding(1.dp)
             .background(backgroundColor, RoundedCornerShape(4.dp))
             .border(

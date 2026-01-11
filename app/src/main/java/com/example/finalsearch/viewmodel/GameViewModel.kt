@@ -5,15 +5,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.finalsearch.data.VocabDatabase
 import com.example.finalsearch.data.WordRepository
-import com.example.finalsearch.game.PlacedWord
 import com.example.finalsearch.game.WordSearchGenerator
 import com.example.finalsearch.game.WordSearchGrid
-import com.example.finalsearch.model.Word
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 class GameViewModel(
     application: Application,
@@ -162,6 +159,53 @@ class GameViewModel(
             )
         }
     }
+
+    // skip to next word
+    fun nextWord() {
+        val grid = _gameState.value.grid ?: return
+        val foundWords = _gameState.value.foundWords
+
+        // get words not found yet
+        val remaining = grid.placedWords.filter { it.word !in foundWords }
+        if (remaining.isEmpty()) return
+
+        val currentIndex = remaining.indexOfFirst { it.word == _gameState.value.currentTargetWord }
+        val nextIndex = (currentIndex + 1) % remaining.size
+
+        val nextPlaced = remaining[nextIndex]
+        val nextWord = grid.originalWords.find { it.wordText.uppercase() == nextPlaced.word }
+
+        _gameState.value = _gameState.value.copy(
+            currentTargetWord = nextPlaced.word,
+            currentDefinition = nextWord?.definition ?: "",
+            selectedCells = emptyList()
+        )
+    }
+
+    // go back  previous word
+    fun previousWord() {
+        val grid = _gameState.value.grid ?: return
+        val foundWords = _gameState.value.foundWords
+
+        val remaining = grid.placedWords.filter { it.word !in foundWords }
+        if (remaining.isEmpty()) return
+
+        val currentIndex = remaining.indexOfFirst { it.word == _gameState.value.currentTargetWord }
+        val prevIndex = if (currentIndex <= 0) remaining.size - 1 else currentIndex - 1
+
+        val prevPlaced = remaining[prevIndex]
+        val prevWord = grid.originalWords.find { it.wordText.uppercase() == prevPlaced.word }
+
+        _gameState.value = _gameState.value.copy(
+            currentTargetWord = prevPlaced.word,
+            currentDefinition = prevWord?.definition ?: "",
+            selectedCells = emptyList()
+        )
+    }
+
+
+
+
 
     //Handle correct word found
 
