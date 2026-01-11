@@ -36,6 +36,48 @@ fun GameScreen(
 
     val gameState by viewModel.gameState.collectAsState()
 
+    var showDifficultyDialog by remember { mutableStateOf(true) }
+
+    if (showDifficultyDialog && gameState.grid == null) {
+        AlertDialog(
+            onDismissRequest = { },
+            title = { Text("Kies moeilijkheidsgraad") },
+            text = {
+                Column {
+                    Text("Easy: 3 woorden")
+                    Text("Medium: 5 woorden")
+                    Text("Hard: 7 woorden")
+                }
+            },
+            confirmButton = {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TextButton(onClick = {
+                        viewModel.setDifficulty("easy")
+                        showDifficultyDialog = false
+                    }) {
+                        Text("Easy")
+                    }
+                    TextButton(onClick = {
+                        viewModel.setDifficulty("medium")
+                        showDifficultyDialog = false
+                    }) {
+                        Text("Medium")
+                    }
+                    TextButton(onClick = {
+                        viewModel.setDifficulty("hard")
+                        showDifficultyDialog = false
+                    }) {
+                        Text("Hard")
+                    }
+                }
+            }
+        )
+    }
+
+
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -112,39 +154,49 @@ fun GameScreen(
                         containerColor = MaterialTheme.colorScheme.primaryContainer
                     )
                 ) {
-                    Row(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                            .padding(16.dp)
                     ) {
-                        // Previous button
-                        IconButton(
-                            onClick = { viewModel.previousWord() },
-                            enabled = !gameState.isComplete
-                        ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Previous word")
-                        }
-
-                        // Def
                         Text(
-                            text = if (gameState.isComplete) {
-                                "Klaar!"
-                            } else {
-                                gameState.currentDefinition
-                            },
-                            fontSize = 16.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
+                            text = "Zoek het woord:",
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
 
-                        // Next button
-                        IconButton(
-                            onClick = { viewModel.nextWord() },
-                            enabled = !gameState.isComplete
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowForward, "Next word")
+                            IconButton(
+                                onClick = { viewModel.previousWord() },
+                                enabled = !gameState.isComplete
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, "Previous")
+                            }
+
+                            Text(
+                                text = if (gameState.isComplete) {
+                                    "Klaar!"
+                                } else {
+                                    gameState.currentDefinition
+                                },
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            IconButton(
+                                onClick = { viewModel.nextWord() },
+                                enabled = !gameState.isComplete
+                            ) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowForward, "Next")
+                            }
                         }
                     }
                 }

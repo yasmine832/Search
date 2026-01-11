@@ -1,8 +1,5 @@
 package com.example.finalsearch.data
 
-import com.example.finalsearch.model.Word
-import com.example.finalsearch.model.WordList
-
 object SampleData {
 
     /**

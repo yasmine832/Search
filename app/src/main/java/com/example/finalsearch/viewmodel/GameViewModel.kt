@@ -37,33 +37,56 @@ class GameViewModel(
     init {
         val database = VocabDatabase.getDatabase(application)
         repository = WordRepository(database.wordDao())
-        loadWordsAndGenerateGrid()
+//        loadWordsAndGenerateGrid()
     }
 
 
     ///Load words and generate grid
 
+    private var difficulty: String = "medium"
+
+    fun setDifficulty(level: String) {
+        difficulty = level
+     loadWordsAndGenerateGrid()
+    }
+
     private fun loadWordsAndGenerateGrid() {
         viewModelScope.launch {
             repository.getWordsForList(wordListId)
-                .collect { words ->
-                    if (words.isNotEmpty() && _gameState.value.grid == null) {
-                        val grid = generator.generateGrid(words)
+                .collect { allWords ->
+                    if (_gameState.value.grid != null) return@collect
 
-                        // Get first word to find
-                        val firstPlaced = grid.placedWords.firstOrNull()
-                        val firstWord = firstPlaced?.let { placed ->
-                            grid.originalWords.find {
-                                it.wordText.uppercase() == placed.word
-                            }
-                        }
-
+                    if (allWords.isEmpty()) {
                         _gameState.value = _gameState.value.copy(
-                            grid = grid,
-                            currentTargetWord = firstPlaced?.word ?: "",
-                            currentDefinition = firstWord?.definition ?: ""
+                            currentDefinition = "Geen woorden in lijst"
                         )
+                        return@collect
                     }
+                    val numberOfWords = when (difficulty) {
+                        "easy" -> 3
+                        "medium" -> 5
+                        "hard" -> 7
+                        else -> 5
+                    }
+
+                    val selectedWords = allWords.shuffled().take(numberOfWords)
+
+                    val grid = generator.generateGrid(selectedWords)
+
+                    val firstPlaced = grid.placedWords.firstOrNull()
+                    val firstWord = firstPlaced?.let { placed ->
+                        grid.originalWords.find {
+                            it.wordText.uppercase() == placed.word
+                        }
+                    }
+
+                    _gameState.value = _gameState.value.copy(
+                        grid = grid,
+                        currentTargetWord = firstPlaced?.word ?: "",
+                        currentDefinition = firstWord?.definition ?: "",
+                        foundWords = emptySet(),
+                        score = 0
+                    )
                 }
         }
     }
@@ -260,6 +283,6 @@ class GameViewModel(
     //Reset game
     fun resetGame() {
         _gameState.value = GameState()
-        loadWordsAndGenerateGrid()
+        difficulty = "medium"
     }
 }

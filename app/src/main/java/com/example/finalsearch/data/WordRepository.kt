@@ -16,9 +16,9 @@ class WordRepository(private val wordDao: WordDao) {
         return wordDao.getAllWordLists()
     }
 
-    suspend fun getWordListById(id: Int): WordList? {
-        return wordDao.getWordListById(id)
-    }
+//    suspend fun getWordListById(id: Int): WordList? {
+//        return wordDao.getWordListById(id)
+//    }
 
     //Add new word list
     suspend fun addWordList(name: String, description: String = ""): Long {
@@ -82,13 +82,13 @@ class WordRepository(private val wordDao: WordDao) {
 
 
     // practice operations
-
-    /**
-     * Get words that need practice
-     * Prioritize low difficulty (0-2)
-     * Prioritize low success rate (<60%)
-     */
-    fun getWordsNeedingPractice(listId: Int, limit: Int = 10): Flow<List<Word>> {
-        return wordDao.getWordsNeedingPractice(listId, limit)
-    }
+//
+//    /**
+//     * Get words that need practice
+//     * Prioritize low difficulty (0-2)
+//     * Prioritize low success rate (<60%)
+//     */
+//    fun getWordsNeedingPractice(listId: Int, limit: Int = 10): Flow<List<Word>> {
+//        return wordDao.getWordsNeedingPractice(listId, limit)
+//    }
 }
