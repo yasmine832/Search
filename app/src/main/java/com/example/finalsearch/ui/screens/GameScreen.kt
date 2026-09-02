@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finalsearch.viewmodel.GameViewModel
+import com.example.finalsearch.ui.components.WordSearchGridView
 
 //game screen for word grid
 @OptIn(ExperimentalMaterial3Api::class)
@@ -243,98 +244,6 @@ fun GameScreen(
                 )
             }
         }
-    }
-}
-
-//Actual grid of letters
-@Composable
-fun WordSearchGridView(
-    grid: com.example.finalsearch.game.WordSearchGrid,
-    selectedCells: List<Pair<Int, Int>>,
-    foundWords: Set<String>,
-    onCellClick: (Int, Int) -> Unit
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        grid.grid.forEachIndexed { rowIndex, row ->
-            Row {
-                row.forEachIndexed { colIndex, letter ->
-                    val isSelected = (rowIndex to colIndex) in selectedCells
-                    val isInFoundWord = isPartOfFoundWord(
-                        rowIndex, colIndex, grid.placedWords, foundWords
-                    )
-
-                    GridCell(
-                        letter = letter,
-                        isSelected = isSelected,
-                        isFound = isInFoundWord,
-                        onClick = { onCellClick(rowIndex, colIndex) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-//Aparte cel
-@Composable
-fun GridCell(
-    letter: Char,
-    isSelected: Boolean,
-    isFound: Boolean,
-    onClick: () -> Unit
-) {
-    val backgroundColor = when {
-        isFound -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-        isSelected -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-        else -> MaterialTheme.colorScheme.surface
-    }
-
-    Box(
-        modifier = Modifier
-            .size(30.dp)
-            .padding(1.dp)
-            .background(backgroundColor, RoundedCornerShape(4.dp))
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                shape = RoundedCornerShape(4.dp)
-            )
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = letter.toString(),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-//Check if cell is part of word
-fun isPartOfFoundWord(
-    row: Int,
-    col: Int,
-    placedWords: List<com.example.finalsearch.game.PlacedWord>,
-    foundWords: Set<String>
-): Boolean {
-    return placedWords.any { placed ->
-        if (placed.word !in foundWords) return@any false
-
-        val (dRow, dCol) = when (placed.direction) {
-            0 -> 0 to 1
-            1 -> 1 to 0
-            else -> 1 to 1
-        }
-
-        for (i in placed.word.indices) {
-            val r = placed.startRow + i * dRow
-            val c = placed.startCol + i * dCol
-            if (r == row && c == col) return true
-        }
-        false
     }
 }
 
